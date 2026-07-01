@@ -34,9 +34,19 @@ cmake --build build --config Release
 .\build\bin\Release\game.exe
 ```
 
+### Faster dev loop (Bash)
+
 ```bash
-./build/bin/Release/game.exe
+./scripts/dev.sh
 ```
+
+Optional flags:
+
+- `--configure` force reconfigure
+- `--debug` build and run Debug
+- `--build-only` compile without running
+- `--run-only` run existing binary
+- `--clean` delete `build/` first
 
 ### Windows (MinGW)
 
@@ -62,8 +72,12 @@ cmake --build build
 
 ```
 game-dev/
-├── src/           # Implementation files (.c)
-├── include/       # Header files (.h)
+├── src/
+│   ├── core/      # Core game loop/state implementation
+│   └── entities/  # Entity implementation
+├── include/
+│   ├── core/      # Core game/config headers
+│   └── entities/  # Entity headers
 ├── build/         # Build output (generated)
 ├── assets/        # Game assets (textures, sounds, etc.)
 ├── CMakeLists.txt # Build configuration

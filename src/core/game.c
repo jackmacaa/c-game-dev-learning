@@ -1,4 +1,4 @@
-#include "game.h"
+#include "core/game.h"
 #include <stdlib.h>
 #include <raylib.h>
 
@@ -13,7 +13,6 @@ Game *game_init(void)
     game->score = 0;
     game->should_close = false;
 
-    // Initialize player entity at center
     entity_init(&game->player,
                 SCREEN_WIDTH / 2.0f,
                 SCREEN_HEIGHT / 2.0f,
@@ -22,47 +21,14 @@ Game *game_init(void)
     return game;
 }
 
-void entity_init(Entity *entity, float x, float y, float width, float height)
-{
-    entity->x = x;
-    entity->y = y;
-    entity->width = width;
-    entity->height = height;
-    entity->velocity_x = 0.0f;
-    entity->velocity_y = 0.0f;
-    entity->active = true;
-}
-
-void entity_update(Entity *entity, float dt)
-{
-    // Update position based on velocity
-    entity->x += entity->velocity_x * dt;
-    entity->y += entity->velocity_y * dt;
-
-    // Clamp to screen bounds
-    if (entity->x < 0)
-        entity->x = 0;
-    if (entity->x + entity->width > SCREEN_WIDTH)
-    {
-        entity->x = SCREEN_WIDTH - entity->width;
-    }
-    if (entity->y < 0)
-        entity->y = 0;
-    if (entity->y + entity->height > SCREEN_HEIGHT)
-    {
-        entity->y = SCREEN_HEIGHT - entity->height;
-    }
-}
-
 void game_update(Game *game, float dt)
 {
-    // Handle global input first so pause can always be toggled.
     if (IsKeyPressed(KEY_SPACE))
     {
         game->state = (game->state == STATE_RUNNING) ? STATE_PAUSED : STATE_RUNNING;
     }
 
-    if (IsKeyPressed(KEY_Q))
+    if (IsKeyPressed(KEY_ESCAPE))
     {
         game->should_close = true;
     }
@@ -72,8 +38,7 @@ void game_update(Game *game, float dt)
 
     game->elapsed_time += dt;
 
-    // Input handling
-    float speed = 300.0f; // pixels per second
+    float speed = 300.0f;
     game->player.velocity_x = 0.0f;
     game->player.velocity_y = 0.0f;
 
@@ -94,10 +59,7 @@ void game_update(Game *game, float dt)
         game->player.velocity_y = -speed;
     }
 
-    // Update entities
     entity_update(&game->player, dt);
-
-    // Game logic goes here
     game->score++;
 }
 
@@ -106,15 +68,12 @@ void game_draw(Game *game)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    // Draw player
-    DrawRectangle(
+    DrawCircle(
         (int)game->player.x,
         (int)game->player.y,
-        (int)game->player.width,
-        (int)game->player.height,
+        (int)(game->player.width / 2),
         BLUE);
 
-    // Draw UI
     DrawText("Raylib Game Dev", 10, 10, 20, DARKGRAY);
     DrawText(TextFormat("Score: %d", game->score), 10, 40, 20, DARKGRAY);
     DrawText(TextFormat("Time: %.1f", game->elapsed_time), 10, 70, 20, DARKGRAY);
@@ -124,7 +83,7 @@ void game_draw(Game *game)
         DrawText("PAUSED", SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 - 10, 40, RED);
     }
 
-    DrawText("WASD/Arrows: Move | Space: Pause | Q: Quit", 10, SCREEN_HEIGHT - 30, 16, DARKGRAY);
+    DrawText("WASD/Arrows: Move | Space: Pause | Esc: Quit", 10, SCREEN_HEIGHT - 30, 16, DARKGRAY);
 
     EndDrawing();
 }

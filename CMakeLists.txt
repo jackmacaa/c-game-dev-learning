@@ -19,17 +19,18 @@ FetchContent_Declare(raylib
 )
 FetchContent_MakeAvailable(raylib)
 
-# Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 # Source files
 set(SOURCES
     src/main.c
-    src/game.c
+    src/core/game.c
+    src/entities/entity.c
 )
 
 # Create executable
 add_executable(game ${SOURCES})
+
+# Target include paths
+target_include_directories(game PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link Raylib
 target_link_libraries(game raylib)
