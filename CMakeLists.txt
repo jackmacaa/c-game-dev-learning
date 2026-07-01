@@ -24,6 +24,7 @@ set(SOURCES
     src/main.c
     src/core/game.c
     src/entities/entity.c
+    src/entities/player.c
 )
 
 # Create executable

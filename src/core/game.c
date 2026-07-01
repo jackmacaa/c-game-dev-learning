@@ -2,27 +2,34 @@
 #include <stdlib.h>
 #include <raylib.h>
 
-Game *game_init(void)
+Game *game_create(void)
 {
+    // Allocate a single root object that owns long-lived game state.
     Game *game = (Game *)malloc(sizeof(Game));
     if (!game)
         return NULL;
 
+    // Boot into active play state.
     game->state = STATE_RUNNING;
-    game->elapsed_time = 0.0f;
-    game->score = 0;
     game->should_close = false;
 
-    entity_init(&game->player,
-                SCREEN_WIDTH / 2.0f,
-                SCREEN_HEIGHT / 2.0f,
-                40.0f, 40.0f);
+    // Spawn player near center with configured sprite-sheet settings.
+    player_initialize(
+        &game->player,
+        SCREEN_WIDTH / 2.0f,
+        SCREEN_HEIGHT / 2.0f,
+        250.0f,
+        250.0f,
+        PLAYER_TEXTURE_PATH,
+        PLAYER_SPRITE_COLUMNS,
+        PLAYER_SPRITE_ROWS);
 
     return game;
 }
 
-void game_update(Game *game, float dt)
+void game_update(Game *game, float delta_time_seconds)
 {
+    // Global input that should work even while paused.
     if (IsKeyPressed(KEY_SPACE))
     {
         game->state = (game->state == STATE_RUNNING) ? STATE_PAUSED : STATE_RUNNING;
@@ -36,47 +43,24 @@ void game_update(Game *game, float dt)
     if (game->state != STATE_RUNNING)
         return;
 
-    game->elapsed_time += dt;
-
-    float speed = 300.0f;
-    game->player.velocity_x = 0.0f;
-    game->player.velocity_y = 0.0f;
-
-    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
-    {
-        game->player.velocity_x = speed;
-    }
-    if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
-    {
-        game->player.velocity_x = -speed;
-    }
-    if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))
-    {
-        game->player.velocity_y = speed;
-    }
-    if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
-    {
-        game->player.velocity_y = -speed;
-    }
-
-    entity_update(&game->player, dt);
-    game->score++;
+    // Update live simulation: input first, then movement/animation step.
+    player_apply_movement_input(&game->player);
+    player_update_frame(&game->player, delta_time_seconds);
 }
 
-void game_draw(Game *game)
+void game_render(Game *game)
 {
+    // Begin a new frame and clear last frame's color buffer.
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawCircle(
-        (int)game->player.x,
-        (int)game->player.y,
-        (int)(game->player.width / 2),
-        BLUE);
+    // Draw world objects first.
+    player_render(&game->player);
 
-    DrawText("Raylib Game Dev", 10, 10, 20, DARKGRAY);
-    DrawText(TextFormat("Score: %d", game->score), 10, 40, 20, DARKGRAY);
-    DrawText(TextFormat("Time: %.1f", game->elapsed_time), 10, 70, 20, DARKGRAY);
+    // Draw UI overlay last so it appears above gameplay.
+    DrawText("JackMac", 10, 10, 20, DARKGRAY);
+    DrawText(TextFormat("State: %s", game->state == STATE_PAUSED ? "Paused" : "Running"), 10, 40, 20, DARKGRAY);
+    DrawText(TextFormat("Player: (%.0f, %.0f)", game->player.body.position_x, game->player.body.position_y), 10, 70, 20, DARKGRAY);
 
     if (game->state == STATE_PAUSED)
     {
@@ -85,13 +69,16 @@ void game_draw(Game *game)
 
     DrawText("WASD/Arrows: Move | Space: Pause | Esc: Quit", 10, SCREEN_HEIGHT - 30, 16, DARKGRAY);
 
+    // Present backbuffer to the screen.
     EndDrawing();
 }
 
-void game_cleanup(Game *game)
+void game_destroy(Game *game)
 {
     if (game)
     {
+        // Player owns texture resources that need explicit unloading.
+        player_unload(&game->player);
         free(game);
     }
 }

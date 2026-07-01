@@ -5,16 +5,19 @@
 
 typedef struct
 {
-    float x;
-    float y;
+    float position_x;
+    float position_y;
     float velocity_x;
     float velocity_y;
-    float width;
-    float height;
+    float render_width;
+    float render_height;
     bool active;
 } Entity;
 
-void entity_init(Entity *entity, float x, float y, float width, float height);
-void entity_update(Entity *entity, float dt);
+// Initialize an entity's transform and runtime flags.
+void entity_initialize(Entity *entity, float start_position_x, float start_position_y, float render_width, float render_height);
+
+// Integrate velocity and keep the entity inside the screen bounds.
+void entity_update_kinematics(Entity *entity, float delta_time_seconds);
 
 #endif // ENTITY_H

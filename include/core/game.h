@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include "core/config.h"
-#include "entities/entity.h"
+#include "entities/player.h"
 
 typedef enum
 {
@@ -16,15 +16,20 @@ typedef enum
 typedef struct
 {
     GameState state;
-    Entity player;
-    float elapsed_time;
-    int score;
+    Player player;
     bool should_close;
 } Game;
 
-Game *game_init(void);
-void game_update(Game *game, float dt);
-void game_draw(Game *game);
-void game_cleanup(Game *game);
+// Allocate and initialize the main game state.
+Game *game_create(void);
+
+// Run one simulation step using frame delta time in seconds.
+void game_update(Game *game, float delta_time_seconds);
+
+// Render one complete frame.
+void game_render(Game *game);
+
+// Free game state and owned resources.
+void game_destroy(Game *game);
 
 #endif // GAME_CORE_H

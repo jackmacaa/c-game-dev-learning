@@ -1,36 +1,39 @@
 #include "entities/entity.h"
 #include "core/config.h"
 
-void entity_init(Entity *entity, float x, float y, float width, float height)
+void entity_initialize(Entity *entity, float start_position_x, float start_position_y, float render_width, float render_height)
 {
-    entity->x = x;
-    entity->y = y;
-    entity->width = width;
-    entity->height = height;
+    // Initial transform and movement state for a newly created entity.
+    entity->position_x = start_position_x;
+    entity->position_y = start_position_y;
+    entity->render_width = render_width;
+    entity->render_height = render_height;
     entity->velocity_x = 0.0f;
     entity->velocity_y = 0.0f;
     entity->active = true;
 }
 
-void entity_update(Entity *entity, float dt)
+void entity_update_kinematics(Entity *entity, float delta_time_seconds)
 {
-    entity->x += entity->velocity_x * dt;
-    entity->y += entity->velocity_y * dt;
+    // Integrate velocity into position using frame delta time.
+    entity->position_x += entity->velocity_x * delta_time_seconds;
+    entity->position_y += entity->velocity_y * delta_time_seconds;
 
-    if (entity->x < 0)
+    // Clamp movement so the entity stays fully visible on screen.
+    if (entity->position_x < 0)
     {
-        entity->x = 0;
+        entity->position_x = 0;
     }
-    if (entity->x + entity->width > SCREEN_WIDTH)
+    if (entity->position_x + entity->render_width > SCREEN_WIDTH)
     {
-        entity->x = SCREEN_WIDTH - entity->width;
+        entity->position_x = SCREEN_WIDTH - entity->render_width;
     }
-    if (entity->y < 0)
+    if (entity->position_y < 0)
     {
-        entity->y = 0;
+        entity->position_y = 0;
     }
-    if (entity->y + entity->height > SCREEN_HEIGHT)
+    if (entity->position_y + entity->render_height > SCREEN_HEIGHT)
     {
-        entity->y = SCREEN_HEIGHT - entity->height;
+        entity->position_y = SCREEN_HEIGHT - entity->render_height;
     }
 }

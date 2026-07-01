@@ -4,12 +4,12 @@
 
 int main(void)
 {
-    // Initialize window
+    // Create OS window + graphics context and target frame pacing.
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Raylib Game Dev");
     SetTargetFPS(TARGET_FPS);
 
-    // Initialize game
-    Game *game = game_init();
+    // Build initial game state graph (player, mode, resources).
+    Game *game = game_create();
     if (!game)
     {
         fprintf(stderr, "Failed to initialize game\n");
@@ -17,21 +17,19 @@ int main(void)
         return 1;
     }
 
-    // Main game loop
+    // Fixed-order frame loop: read dt, update simulation, render frame.
     while (!WindowShouldClose() && !game->should_close)
     {
-        // Calculate delta time
-        float dt = GetFrameTime();
+        // Delta time in seconds since previous frame.
+        float delta_time_seconds = GetFrameTime();
 
-        // Update
-        game_update(game, dt);
+        game_update(game, delta_time_seconds);
 
-        // Draw
-        game_draw(game);
+        game_render(game);
     }
 
-    // Cleanup
-    game_cleanup(game);
+    // Release game-owned resources before shutting down window.
+    game_destroy(game);
     CloseWindow();
 
     return 0;
