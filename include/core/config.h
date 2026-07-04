@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 1440
+#define SCREEN_HEIGHT 900
 #define TARGET_FPS 60
 
 #define PLAYER_TEXTURE_PATH "assets/walk-sheet.png"

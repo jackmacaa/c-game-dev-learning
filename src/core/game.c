@@ -16,10 +16,10 @@ Game *game_create(void)
     // Spawn player near center with configured sprite-sheet settings.
     player_initialize(
         &game->player,
-        SCREEN_WIDTH / 2.0f,
-        SCREEN_HEIGHT / 2.0f,
-        250.0f,
-        250.0f,
+        SCREEN_WIDTH * 0.5f - 48.0f,
+        SCREEN_HEIGHT * 0.5f - 48.0f,
+        200.0f,
+        200.0f,
         PLAYER_TEXTURE_PATH,
         PLAYER_SPRITE_COLUMNS,
         PLAYER_SPRITE_ROWS);
@@ -54,13 +54,10 @@ void game_render(Game *game)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    // Draw world objects first.
     player_render(&game->player);
 
     // Draw UI overlay last so it appears above gameplay.
-    DrawText("JackMac", 10, 10, 20, DARKGRAY);
-    DrawText(TextFormat("State: %s", game->state == STATE_PAUSED ? "Paused" : "Running"), 10, 40, 20, DARKGRAY);
-    DrawText(TextFormat("Player: (%.0f, %.0f)", game->player.body.position_x, game->player.body.position_y), 10, 70, 20, DARKGRAY);
+    DrawText(TextFormat("Player: (%.0f, %.0f)", game->player.body.position_x, game->player.body.position_y), 10, 10, 20, DARKGRAY);
 
     if (game->state == STATE_PAUSED)
     {

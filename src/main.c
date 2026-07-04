@@ -5,7 +5,7 @@
 int main(void)
 {
     // Create OS window + graphics context and target frame pacing.
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Raylib Game Dev");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game Dev in C");
     SetTargetFPS(TARGET_FPS);
 
     // Build initial game state graph (player, mode, resources).

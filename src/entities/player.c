@@ -1,5 +1,6 @@
 #include "entities/player.h"
 #include "core/config.h"
+#include <math.h>
 
 void player_initialize(Player *player, float start_position_x, float start_position_y, float render_width, float render_height, const char *sprite_texture_path, int sprite_columns, int sprite_rows)
 {
@@ -34,25 +35,36 @@ void player_apply_movement_input(Player *player)
     int previous_row = player->sprite_row;
 
     // Rebuild velocity from current keyboard state every frame.
-    player->body.velocity_x = 0.0f;
-    player->body.velocity_y = 0.0f;
+    float input_x = 0.0f;
+    float input_y = 0.0f;
 
     if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
     {
-        player->body.velocity_x = player->move_speed_units_per_sec;
+        input_x += 1.0f;
     }
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
     {
-        player->body.velocity_x = -player->move_speed_units_per_sec;
+        input_x -= 1.0f;
     }
     if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))
     {
-        player->body.velocity_y = player->move_speed_units_per_sec;
+        input_y += 1.0f;
     }
     if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
     {
-        player->body.velocity_y = -player->move_speed_units_per_sec;
+        input_y -= 1.0f;
     }
+
+    // Normalize input so diagonal movement has the same total speed.
+    float input_length = sqrtf(input_x * input_x + input_y * input_y);
+    if (input_length > 0.0f)
+    {
+        input_x /= input_length;
+        input_y /= input_length;
+    }
+
+    player->body.velocity_x = input_x * player->move_speed_units_per_sec;
+    player->body.velocity_y = input_y * player->move_speed_units_per_sec;
 
     // Choose the active direction row from movement intent.
     if (player->body.velocity_x > 0.0f)
@@ -84,7 +96,7 @@ void player_apply_movement_input(Player *player)
 
 void player_update_frame(Player *player, float delta_time_seconds)
 {
-    // Apply velocity movement and world-bound clamping.
+    // Move with velocity integration and keep player inside screen bounds.
     entity_update_kinematics(&player->body, delta_time_seconds);
 
     // Advance walk cycle columns while moving.
