@@ -17,7 +17,7 @@ typedef struct
 // Initialize an entity's transform and runtime flags.
 void entity_initialize(Entity *entity, float start_position_x, float start_position_y, float render_width, float render_height);
 
-// Integrate velocity and keep the entity inside the screen bounds.
+// Integrate velocity in world space.
 void entity_update_kinematics(Entity *entity, float delta_time_seconds);
 
 #endif // ENTITY_H

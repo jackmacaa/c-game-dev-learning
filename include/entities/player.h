@@ -10,6 +10,16 @@ typedef struct
     Entity body;
     float move_speed_units_per_sec;
     Vector2 facing;
+    bool is_sprinting;
+    float max_stamina;
+    float stamina;
+    float stamina_regen_cooldown_seconds;
+
+    int max_health;
+    int health;
+    float damage_invulnerability_timer;
+    float damage_flash_timer;
+
     int sprite_col;
     int sprite_row;
 
@@ -29,6 +39,12 @@ void player_apply_movement_input(Player *player);
 
 // Advance movement and animation timers for one frame.
 void player_update_frame(Player *player, float delta_time_seconds);
+
+// Deal damage while honoring invulnerability cooldown.
+bool player_apply_damage(Player *player, int damage_amount, float invulnerability_seconds);
+
+// Check if player health reached zero.
+bool player_is_dead(const Player *player);
 
 // Draw the player sprite (or fallback shape if texture is missing).
 void player_render(const Player *player);

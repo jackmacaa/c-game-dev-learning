@@ -23,8 +23,13 @@ FetchContent_MakeAvailable(raylib)
 set(SOURCES
     src/main.c
     src/core/game.c
+    src/core/camera.c
     src/entities/entity.c
     src/entities/player.c
+    src/entities/gem.c
+    src/entities/altar.c
+    src/entities/enemy.c
+    src/world/world.c
 )
 
 # Create executable

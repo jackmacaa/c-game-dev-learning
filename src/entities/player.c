@@ -8,8 +8,16 @@ void player_initialize(Player *player, float start_position_x, float start_posit
     entity_initialize(&player->body, start_position_x, start_position_y, render_width, render_height);
 
     // Player movement tuning and initial facing direction.
-    player->move_speed_units_per_sec = 300.0f;
+    player->move_speed_units_per_sec = 500.0f;
     player->facing = (Vector2){1.0f, 0.0f};
+    player->is_sprinting = false;
+    player->max_stamina = 100.0f;
+    player->stamina = player->max_stamina;
+    player->stamina_regen_cooldown_seconds = 0.0f;
+    player->max_health = 5;
+    player->health = player->max_health;
+    player->damage_invulnerability_timer = 0.0f;
+    player->damage_flash_timer = 0.0f;
     player->sprite_col = PLAYER_DOWN_COL;
     player->sprite_row = PLAYER_DOWN_ROW;
 
@@ -63,8 +71,12 @@ void player_apply_movement_input(Player *player)
         input_y /= input_length;
     }
 
-    player->body.velocity_x = input_x * player->move_speed_units_per_sec;
-    player->body.velocity_y = input_y * player->move_speed_units_per_sec;
+    bool wants_sprint = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+    player->is_sprinting = wants_sprint && player->stamina > 0.0f;
+    float current_speed = player->move_speed_units_per_sec * (player->is_sprinting ? 1.45f : 1.0f);
+
+    player->body.velocity_x = input_x * current_speed;
+    player->body.velocity_y = input_y * current_speed;
 
     // Choose the active direction row from movement intent.
     if (player->body.velocity_x > 0.0f)
@@ -96,6 +108,55 @@ void player_apply_movement_input(Player *player)
 
 void player_update_frame(Player *player, float delta_time_seconds)
 {
+    if (player->damage_invulnerability_timer > 0.0f)
+    {
+        player->damage_invulnerability_timer -= delta_time_seconds;
+        if (player->damage_invulnerability_timer < 0.0f)
+        {
+            player->damage_invulnerability_timer = 0.0f;
+        }
+    }
+
+    if (player->damage_flash_timer > 0.0f)
+    {
+        player->damage_flash_timer -= delta_time_seconds;
+        if (player->damage_flash_timer < 0.0f)
+        {
+            player->damage_flash_timer = 0.0f;
+        }
+    }
+
+    bool moving = fabsf(player->body.velocity_x) > 0.1f || fabsf(player->body.velocity_y) > 0.1f;
+    if (player->is_sprinting && moving)
+    {
+        player->stamina -= 36.0f * delta_time_seconds;
+        if (player->stamina < 0.0f)
+        {
+            player->stamina = 0.0f;
+            player->is_sprinting = false;
+        }
+        player->stamina_regen_cooldown_seconds = 0.8f;
+    }
+    else
+    {
+        if (player->stamina_regen_cooldown_seconds > 0.0f)
+        {
+            player->stamina_regen_cooldown_seconds -= delta_time_seconds;
+            if (player->stamina_regen_cooldown_seconds < 0.0f)
+            {
+                player->stamina_regen_cooldown_seconds = 0.0f;
+            }
+        }
+        else
+        {
+            player->stamina += 22.0f * delta_time_seconds;
+            if (player->stamina > player->max_stamina)
+            {
+                player->stamina = player->max_stamina;
+            }
+        }
+    }
+
     // Move with velocity integration and keep player inside screen bounds.
     entity_update_kinematics(&player->body, delta_time_seconds);
 
@@ -130,6 +191,34 @@ void player_update_frame(Player *player, float delta_time_seconds)
     }
 }
 
+bool player_apply_damage(Player *player, int damage_amount, float invulnerability_seconds)
+{
+    if (!player || damage_amount <= 0)
+    {
+        return false;
+    }
+
+    if (player->damage_invulnerability_timer > 0.0f || player->health <= 0)
+    {
+        return false;
+    }
+
+    player->health -= damage_amount;
+    if (player->health < 0)
+    {
+        player->health = 0;
+    }
+
+    player->damage_invulnerability_timer = invulnerability_seconds;
+    player->damage_flash_timer = 0.16f;
+    return true;
+}
+
+bool player_is_dead(const Player *player)
+{
+    return !player || player->health <= 0;
+}
+
 void player_render(const Player *player)
 {
     // Preferred path: render sprite-sheet frame.
@@ -159,7 +248,8 @@ void player_render(const Player *player)
             player->body.render_width,
             player->body.render_height};
 
-        DrawTexturePro(player->texture, source, destination, (Vector2){0.0f, 0.0f}, 0.0f, WHITE);
+        Color tint = (player->damage_flash_timer > 0.0f) ? (Color){255, 145, 145, 255} : WHITE;
+        DrawTexturePro(player->texture, source, destination, (Vector2){0.0f, 0.0f}, 0.0f, tint);
         return;
     }
 

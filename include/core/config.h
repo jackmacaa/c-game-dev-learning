@@ -1,9 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SCREEN_WIDTH 1440
-#define SCREEN_HEIGHT 900
+#define SCREEN_WIDTH 1920   
+#define SCREEN_HEIGHT 1080
 #define TARGET_FPS 60
+
+#define WORLD_WIDTH 4000
+#define WORLD_HEIGHT 4000
+#define WORLD_TILE_SIZE 80
 
 #define PLAYER_TEXTURE_PATH "assets/walk-sheet.png"
 #define PLAYER_SPRITE_COLUMNS 6
@@ -20,5 +24,7 @@
 #define PLAYER_RIGHT_ROW 2
 #define PLAYER_UP_COL 0
 #define PLAYER_UP_ROW 3
+
+#define PLAYER_RENDER_SIZE 200.0f
 
 #endif // CONFIG_H

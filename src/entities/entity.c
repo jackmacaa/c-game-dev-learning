@@ -1,5 +1,4 @@
 #include "entities/entity.h"
-#include "core/config.h"
 
 void entity_initialize(Entity *entity, float start_position_x, float start_position_y, float render_width, float render_height)
 {
@@ -18,22 +17,4 @@ void entity_update_kinematics(Entity *entity, float delta_time_seconds)
     // Integrate velocity into position using frame delta time.
     entity->position_x += entity->velocity_x * delta_time_seconds;
     entity->position_y += entity->velocity_y * delta_time_seconds;
-
-    // Clamp movement so the entity stays fully visible on screen.
-    if (entity->position_x < 0)
-    {
-        entity->position_x = 0;
-    }
-    if (entity->position_x + entity->render_width > SCREEN_WIDTH)
-    {
-        entity->position_x = SCREEN_WIDTH - entity->render_width;
-    }
-    if (entity->position_y < 0)
-    {
-        entity->position_y = 0;
-    }
-    if (entity->position_y + entity->render_height > SCREEN_HEIGHT)
-    {
-        entity->position_y = SCREEN_HEIGHT - entity->render_height;
-    }
 }

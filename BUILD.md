@@ -90,10 +90,20 @@ game-dev/
 
 After building, you should see a window with:
 
-- A blue square (player) that moves with WASD or arrow keys
-- Score counter
-- Pause functionality (Space)
-- Quit with Q
+- A sprite-based player that moves with WASD or arrow keys across a larger world
+- Distinct map regions and a mountain altar at world center
+- 6 colored triangle gems (3 primary + 3 secondary) distributed around the world
+- Corrupted guardian enemies patrolling key routes and the mountain approach
+- A gem HUD with collection progress
+- Health tracking and melee strike combat (`F`)
+- Sprint movement (`Shift`) for traversal and kiting
+- Stamina management for sprinting and a live essence counter from defeated guardians
+- Terrain obstacles (cliffs/mountain) that block movement
+- Minimap markers for player, remaining gems, enemies, and mountain altar
+- Dynamic day/night ambience tint over the world
+- Manual fusion prompt at the altar when all gems are collected and guardians are defeated (`E`)
+- Restart option after victory/defeat (`R`)
+- Pause functionality (`Space`) and quit (`Esc`)
 
 ---
 
